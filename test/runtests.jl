@@ -43,7 +43,7 @@ using TestItemRunner
     @test 4.3 ∉ b
     @test extrema(b) == (1, 4)
 
-    @test sprint(show, b) == "1.0..2.0 ∪ 3.0..4.0"
+    @test sprint(show, b) == "1.0 .. 2.0 ∪ 3.0 .. 4.0"
 end
 
 
