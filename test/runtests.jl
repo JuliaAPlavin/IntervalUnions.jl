@@ -7,7 +7,7 @@ using TestItemRunner
     using IntervalSets
     using IntervalUnions: intervals
 
-    x = 1..2.
+    x = 1..2
     a = IntervalUnion(x)
     @test length(intervals(a)) == 1
     @test intervals(a)[1] === x
@@ -26,9 +26,9 @@ using TestItemRunner
     @test intervals(b3) === (x, x2, x3)
 
     @test intervals(setdiff(b3, x2)) === (x, x3)
-    @test intervals(setdiff(b3, 3.3..3.5)) === (1..2., Interval{:closed, :open}(3, 3.3), Interval{:open, :closed}(3.5, 4), 5..6.)
-    @test intervals(setdiff(b3, 3.3..10)) === (1..2., Interval{:closed, :open}(3, 3.3))
-    @test intervals(setdiff(b3, IntervalUnion((3.3..3.5, 5..10.)))) === (1..2., Interval{:closed, :open}(3, 3.3), Interval{:open, :closed}(3.5, 4))
+    @test intervals(setdiff(b3, 3.3..3.5)) === (1..2, Interval{:closed, :open}(3, 3.3), Interval{:open, :closed}(3.5, 4), 5..6.)
+    @test intervals(setdiff(b3, 4..10)) === (1..2, Interval{:closed, :open}(3., 4.))
+    @test intervals(setdiff(b3, IntervalUnion((3.3..3.5, 5..10.)))) === (1..2, Interval{:closed, :open}(3, 3.3), Interval{:open, :closed}(3.5, 4))
     @test intervals(b3 ∩ IntervalUnion((3.3..3.5, 5..10.))) === (3.3..3.5, 5..6.)
 
     c = x ∪ (1..0)
@@ -43,7 +43,7 @@ using TestItemRunner
     @test 4.3 ∉ b
     @test extrema(b) == (1, 4)
 
-    @test sprint(show, b) == "1.0 .. 2.0 ∪ 3.0 .. 4.0"
+    @test sprint(show, b) == "1 .. 2 ∪ 3.0 .. 4.0"
 end
 
 
