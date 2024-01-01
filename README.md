@@ -1,6 +1,6 @@
 # IntervalUnions.jl
 
-Extend [IntervalSets.jl](https://github.com/JuliaMath/IntervalSets.jl) with _interval unions_ -- unions of disjoint intervals.
+Extend [IntervalSets.jl](https://github.com/JuliaMath/IntervalSets.jl) with _interval unions_ -- unions of disjoint intervals. Not all operations are type-stable for now, this is subject to further improvements.
 
 ## Examples
 
