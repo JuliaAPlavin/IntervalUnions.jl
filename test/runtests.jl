@@ -43,6 +43,7 @@ using TestItemRunner
     @test 4.3 ∉ b
     @test extrema(b) == (1, 4)
 
+    @test sprint(show, IntervalUnion(())) == "∅"
     @test sprint(show, b) == "1 .. 2 ∪ 3.0 .. 4.0"
 end
 

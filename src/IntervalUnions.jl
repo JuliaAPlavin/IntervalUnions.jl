@@ -48,6 +48,7 @@ Base.maximum(iu::IntervalUnion) = maximum(maximum, intervals(iu))
 Base.extrema(iu::IntervalUnion) = (minimum(iu), maximum(iu))
 
 function Base.show(io::IO, iu::IntervalUnion)
+    isempty(intervals(iu)) && return print(io, "∅")
     for (i, interval) in enumerate(intervals(iu))
         i > 1 && print(io, " ∪ ")
         print(io, interval)
