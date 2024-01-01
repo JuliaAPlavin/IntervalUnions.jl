@@ -13,9 +13,18 @@ end
 intervals(x::Interval) = (x,)
 @accessor intervals(x::IntervalUnion) = x.ints
 
-Base.:(==)(a::IntervalUnion, b::IntervalUnion) = intervals(a)::Tuple == intervals(b)::Tuple
-Base.:(==)(a::IntervalUnion, b::Interval) = intervals(a)::Tuple == intervals(b)::Tuple
-Base.:(==)(a::Interval, b::IntervalUnion) = intervals(a)::Tuple == intervals(b)::Tuple
+_is_intervals_equal(a, b) =
+    if length(a) == length(b)
+        all(splat(==), zip(a, b))
+    elseif length(a) == 0 || length(b) == 0
+        all(isempty, a) && all(isempty, b)
+    else
+        false
+    end
+
+Base.:(==)(a::IntervalUnion, b::IntervalUnion) = _is_intervals_equal(intervals(a), intervals(b))
+Base.:(==)(a::IntervalUnion, b::Interval) = _is_intervals_equal(intervals(a), intervals(b))
+Base.:(==)(a::Interval, b::IntervalUnion) = _is_intervals_equal(intervals(a), intervals(b))
 
 IntervalUnion(x::Union{Interval, IntervalUnion}) = convert(IntervalUnion, x)
 Base.convert(::Type{IntervalUnion}, x::IntervalUnion) = x
@@ -33,13 +42,22 @@ complement(i::Interval{L,R,T}) where {T,L,R} = IntervalUnion((
     Interval{_opposite_closedness(R), :open}(rightendpoint(i), typemax(T)),
 ))
 
-Base.setdiff(a::Interval, b::IntervalUnion) = @p intervals(b) |> map(_setdiff(a, _)) |> reduce(∩) |> _dropempty
-Base.setdiff(a::IntervalUnion, b::Union{Interval, IntervalUnion}) = @p intervals(a) |> map(setdiff(_, IntervalUnion(b))) |> reduce(∪)
+Base.setdiff(a::Interval, b::IntervalUnion) =
+    isempty(intervals(b)) ?
+        IntervalUnion((a,)) :
+        @p intervals(b) |> map(_setdiff(a, _)) |> reduce(∩) |> _dropempty
+Base.setdiff(a::IntervalUnion, b::Union{Interval, IntervalUnion}) =
+    isempty(intervals(a)) ?
+        a :
+        @p intervals(a) |> map(setdiff(_, IntervalUnion(b))) |> reduce(∪)
 Base.:∪(a::Interval, b::IntervalUnion) = IntervalUnion((intervals(a)..., intervals(b)...))
 Base.:∪(a::IntervalUnion, b::Union{Interval, IntervalUnion}) = IntervalUnion((intervals(a)..., intervals(b)...))
 Base.:∩(a::Interval, b::IntervalUnion) = @modify(i -> a ∩ i, intervals(b) |> Elements()) |> _dropempty
 Base.:∩(a::IntervalUnion, b::Interval) = @modify(i -> b ∩ i, intervals(a) |> Elements()) |> _dropempty
-Base.:∩(a::IntervalUnion, b::IntervalUnion) = @p intervals(a) |> map(_ ∩ b) |> reduce(∪)
+Base.:∩(a::IntervalUnion, b::IntervalUnion) = 
+    isempty(intervals(a)) ?
+        a :
+        @p intervals(a) |> map(_ ∩ b) |> reduce(∪)
 
 IntervalSets.infimum(iu::IntervalUnion) = minimum(infinimum, intervals(iu))
 IntervalSets.supremum(iu::IntervalUnion) = maximum(supremum, intervals(iu))

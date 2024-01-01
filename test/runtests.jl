@@ -13,10 +13,6 @@ using TestItemRunner
     @test intervals(a)[1] === x
 
     x2 = 3..4.
-    b = IntervalUnion([x, x2])
-    @test length(intervals(b)) == 2
-    @test intervals(b) == [x, x2]
-
     b = IntervalUnion((x, x2))
     @test length(intervals(b)) == 2
     @test intervals(b) === (x, x2)
@@ -45,6 +41,91 @@ using TestItemRunner
 
     @test sprint(show, IntervalUnion(())) == "∅"
     @test sprint(show, b) == "1 .. 2 ∪ 3.0 .. 4.0"
+end
+
+@testitem "equality" begin
+    using IntervalSets
+
+    @test IntervalUnion(1..2) == 1..2
+    @test IntervalUnion(1..2) == 1..2.0
+    @test IntervalUnion(1..2) == IntervalUnion(1..2)
+    @test IntervalUnion(1..2) != 1.1..2
+    @test IntervalUnion(1..2) != IntervalUnion(1..3)
+    @test IntervalUnion(1..2) != IntervalUnion((1..2, 3..4))
+    @test IntervalUnion(1..2) != IntervalUnion(())
+
+    @test_broken IntervalUnion((1..2, 3..4)) == IntervalUnion((3..4, 1..2))
+    @test_broken IntervalUnion((1..2, 2..3)) == 1..3
+
+    @test IntervalUnion(()) == IntervalUnion(())
+    @test IntervalUnion(()) != 1..2
+    @test (1..0) == (2..1)
+    @test IntervalUnion(1..0) == 2..1
+    @test IntervalUnion(()) == 2..1
+end
+
+@testitem "empty" begin
+    using IntervalSets
+
+    ∅ = IntervalUnion(())
+    
+    int = 1..3
+    @test int ∩ ∅ == ∅
+    @test int ∪ ∅ == int
+    @test ∅ ∩ int == ∅
+    @test ∅ ∪ int == int
+    @test setdiff(int, ∅) == int
+    @test setdiff(∅, int) == ∅
+    
+    @test IntervalUnion((int,)) ∩ ∅ == ∅
+    @test IntervalUnion((int,)) ∪ ∅ == IntervalUnion((int,))
+    @test ∅ ∩ IntervalUnion((int,)) == ∅
+    @test ∅ ∪ IntervalUnion((int,)) == IntervalUnion((int,))
+    @test setdiff(IntervalUnion((int,)), ∅) == IntervalUnion((int,))
+    @test setdiff(∅, IntervalUnion((int,))) == ∅
+
+    @test ∅ ∩ ∅ == ∅
+    @test ∅ ∪ ∅ == ∅
+    @test setdiff(∅, ∅) == ∅
+    @test_throws Exception minimum(∅)
+    @test_throws Exception supremum(∅)
+end
+
+@testitem "interval collection types" begin
+    using IntervalSets
+    using UnionCollections
+
+    ia = 1..2
+    ib = 3..4.
+    iu_t = IntervalUnion((ia, ib))
+    iu_v = IntervalUnion([ia, ib])
+    iu_uv = IntervalUnion(unioncollection([ia, ib]))
+
+    @testset for iu in (iu_t, iu_v, iu_uv)
+        for b in (iu_t, iu_v, iu_uv)
+            @test iu == b
+        end
+
+        @test !isempty(iu)
+        @test 1.5 ∈ iu
+        @test 2.5 ∉ iu
+        
+        @test setdiff(iu, 2.4..2.5) == iu
+        @test setdiff(iu, 2..3) == IntervalUnion((Interval{:closed,:open}(1, 2), Interval{:open,:closed}(3, 4)))
+        @test setdiff(iu, 1..3) == Interval{:open,:closed}(3, 4)
+        @test setdiff(iu, 0..10) |> isempty
+        @test setdiff(iu, iu) |> isempty
+
+        @test iu ∩ (2.4..2.5) |> isempty
+        @test iu ∩ (2..3) == IntervalUnion((2..2, 3..3))
+        @test iu ∩ (1..4) == iu
+        @test iu ∩ iu == iu
+        @test iu ∪ (2.4..2.5) == IntervalUnion((1..2, 3..4, 2.4..2.5))
+        @test_broken iu ∪ (2.4..2.5) == IntervalUnion((1..2, 2.4..2.5, 3..4))
+        @test_broken iu ∪ (3..3.5) == iu
+        @test_broken iu ∪ (1..4) == iu
+        @test_broken iu ∪ iu == iu
+    end
 end
 
 
