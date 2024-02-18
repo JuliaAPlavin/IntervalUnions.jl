@@ -4,7 +4,7 @@ using IntervalSets
 using Accessors
 using DataPipes
 
-export IntervalUnion
+export IntervalUnion, complement
 
 struct IntervalUnion{T} <: IntervalSets.Domain{T}
     ints::T
@@ -38,8 +38,8 @@ _opposite_closedness(x::Symbol) = x == :closed ? :open : x == :open ? :closed : 
 _setdiff(a::Interval{La, Ra}, b::Interval{Lb, Rb}) where {La, Ra, Lb, Rb} = intersect(a, complement(b))
 
 complement(i::Interval{L,R,T}) where {T,L,R} = IntervalUnion((
-    Interval{:open, _opposite_closedness(L)}(typemin(T), leftendpoint(i)),
-    Interval{_opposite_closedness(R), :open}(rightendpoint(i), typemax(T)),
+    Interval{:open, _opposite_closedness(L)}(typemin(float(T)), leftendpoint(i)),
+    Interval{_opposite_closedness(R), :open}(rightendpoint(i), typemax(float(T))),
 ))
 
 Base.setdiff(a::Interval, b::IntervalUnion) =

@@ -12,17 +12,18 @@ using TestItemRunner
     @test length(intervals(a)) == 1
     @test intervals(a)[1] === x
 
-    x2 = 3..4.
+    x2 = 3..4
     b = IntervalUnion((x, x2))
     @test length(intervals(b)) == 2
     @test intervals(b) === (x, x2)
 
-    x3 = 5..6.
+    x3 = 5..6
     b3 = b ∪ x3
     @test intervals(b3) === (x, x2, x3)
 
     @test intervals(setdiff(b3, x2)) === (x, x3)
-    @test intervals(setdiff(b3, 3.3..3.5)) === (1..2, Interval{:closed, :open}(3, 3.3), Interval{:open, :closed}(3.5, 4), 5..6.)
+    @test intervals(complement(x2)) === (Interval{:open, :open}(-Inf, 3), Interval{:open, :open}(4, Inf))
+    @test intervals(setdiff(b3, 3.3..3.5)) === (1..2, Interval{:closed, :open}(3, 3.3), Interval{:open, :closed}(3.5, 4), 5..6)
     @test intervals(setdiff(b3, 4..10)) === (1..2, Interval{:closed, :open}(3., 4.))
     @test intervals(setdiff(b3, IntervalUnion((3.3..3.5, 5..10.)))) === (1..2, Interval{:closed, :open}(3, 3.3), Interval{:open, :closed}(3.5, 4))
     @test intervals(b3 ∩ IntervalUnion((3.3..3.5, 5..10.))) === (3.3..3.5, 5..6.)
@@ -40,7 +41,7 @@ using TestItemRunner
     @test extrema(b) == (1, 4)
 
     @test sprint(show, IntervalUnion(())) == "∅"
-    @test sprint(show, b) == "1 .. 2 ∪ 3.0 .. 4.0"
+    @test sprint(show, b) == "1 .. 2 ∪ 3 .. 4"
 end
 
 @testitem "equality" begin
