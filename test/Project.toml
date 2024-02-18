@@ -8,7 +8,7 @@ TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 UnionCollections = "ea2a18ed-132b-4398-a457-2ce4804e5c00"
 
 [compat]
-Aqua = "0.6.5"
+Aqua = "0.8"
 CompatHelperLocal = "0.1.25"
 IntervalSets = "0.7.4"
 TestItemRunner = "0.2.2"
